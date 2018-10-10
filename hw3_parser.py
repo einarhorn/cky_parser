@@ -28,56 +28,78 @@ class CKYParser:
         for j in range(1, width):
             # First fill in a terminal cell
             current_word = tokenized_sentence[j - 1]
-            table[j - 1, j] = calculate_diagonal_cell(current_word)
-
+            table[j - 1][j] = self.__calculate_diagonal_cell(table, current_word)
             # Iterate over cells in upward direction from bottom-most cell
-            for i in range(j - 2, 0, -1):
-                for k in range(i + 1, j - 1):
-                    updated_entry = calculate_intermediate_cell(i, j, k)
-                    table[i, j] = table[i, j].union(updated_entry)
+            for i in range(j - 1, -1, -1):
+                for k in range(i + 1, j):
+                    updated_entry = self.__calculate_intermediate_cell(table, i, j, k)
+                    table[i][j] = table[i][j].union(updated_entry)
+
+        # Helpful for visualizing table!
+        # self.__visualize_table(table)
+    
+        # Return all top-level CKYEntry nodes
+        top_level_entries = table[0][width-1]
+        valid_top_level_entries = {entry for entry in top_level_entries if entry.nltk_node.symbol() == 'S'}
+        return valid_top_level_entries
+
+    # Pretty print the provided 2d list
+    def __visualize_table(self, table):
+        for row in table:
+            row_contents = []
+            for col in row:
+                row_contents.append([cky_entry.nltk_node for cky_entry in list(col)])
+            print(row_contents)
 
     # Return set of CKYEntrys, which correspond to nonterminals with current_word as a rhs terminal
-    def calculate_diagonal_cell(current_word):
+    def __calculate_diagonal_cell(self, table, current_word):
         # Search productions to find all lhs nonterminals that have current_word as a rhs terminal
-        releveant_productions = grammar.productions(rhs=current_word)
+        releveant_productions = self.grammar.productions(rhs=current_word)
 
         # Get LHS of each of the productions
         productions_lhs = {production.lhs() for production in releveant_productions}
 
         # Convert to a set of CKYEntry items
-        return {CKYEntry(nonterminal) for nonterminal in nonterminals}
+        return {CKYEntry(nonterminal) for nonterminal in productions_lhs}
 
     # Calculate intermediate cells, based on two previously calculated cells
     # {A | A → BC ∈ grammar,
     #   B ∈ table[ i, k ],
     #   C ∈ table[ k, j ]
     # }
-    def calculate_intermediate_cell(i, j, k):
+    def __calculate_intermediate_cell(self, table, i, j, k):
         # Set containing the CKYEntrys we want to return
         cell_contents = set()
 
         # Get contents of the two cells we will be using
-        first_set = table[i,k]
-        second_set = table[k,j]
+        first_set = table[i][k]
+        second_set = table[k][j]
 
         # Calculate every combination of first and second cell
         for first_set_item in first_set:
             for second_set_item in second_set:
                 # Check whether there is a production A -> B C, where B is first_set_item
                 # and B is second_set_item
-                releveant_productions = get_productions_with_rhs(first_set_item, second_set_item)
+                releveant_productions = self.__get_productions_with_rhs(first_set_item.nltk_node, second_set_item.nltk_node)
 
                 # Get LHS of each of the productions
                 productions_lhs = {production.lhs() for production in releveant_productions}
 
                 # Convert each LHS entry to a CKYEntry item
                 node_parents = [first_set_item, second_set_item]
-                cky_entries = {CKYEntry(productions_lhs, node_parents) for production_lhs in productions_lhs}
+                cky_entries = {CKYEntry(production_lhs, parents=node_parents) for production_lhs in productions_lhs}
 
                 # Union with our set of valid CKYEntry items created so far
                 cell_contents = cell_contents.union(cky_entries)
         
         return cell_contents
+    
+    def __get_productions_with_rhs(self, first_rhs, second_rhs):
+        # Get all productions that contain the first_rhs nonterminal on its RHS
+        productions_with_first_rhs = self.grammar.productions(rhs = first_rhs)
+
+        # Get all productions that also contain second_rhs
+        return [production for production in productions_with_first_rhs if second_rhs in production.rhs()]
                 
 
 
@@ -93,7 +115,7 @@ def main(grammar_filename, sentence_filename, output_filename):
     for line in sentence_file:
         # Strip any trailing whitespace from line (including newlines)
         line = line.rstrip()
-        parser.parse_sentence(line)
+        print(parser.parse_sentence(line))
 
     # Output parse data to output_filename
 
