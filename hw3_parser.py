@@ -2,20 +2,30 @@
 import sys
 import nltk
 
+# This class corresponds to a node in the parse tree
+#
+# nltk_node refers to a nltk nonterminal, taken from the grammar
+# children refers to either - 
+# 1.) a pair of CKYEntries that result from this node
+#     e.g. A -> BC, A is the nltk_node, and [B, C] are the children
+# 2.) a single terminal word (string)
 class CKYEntry:
-    def __init__(self, nltk_node, parents = []):
+    def __init__(self, nltk_node, children = []):
         self.nltk_node = nltk_node
-        self.parents = parents
+        self.children = children
 
 
+# This class handles the CKY parsing algorithm
 class CKYParser:
     def __init__(self, grammar):
         self.grammar = grammar
-    
+
+    # Parse a raw sentence, and return a list of valid parses
     def parse_sentence(self, sentence):
         tokenized_sentence = nltk.word_tokenize(sentence)
         return self.parse_tokenized_sentence(tokenized_sentence)
 
+    # Parse a tokenized sentence, and return a list of valid parses
     def parse_tokenized_sentence(self, tokenized_sentence):
         # Build our square CKY table
         # Table will be (n + 1) x (n + 1), where n is len(tokenized_sentence)
@@ -60,7 +70,7 @@ class CKYParser:
         productions_lhs = {production.lhs() for production in releveant_productions}
 
         # Convert to a set of CKYEntry items
-        return {CKYEntry(nonterminal) for nonterminal in productions_lhs}
+        return {CKYEntry(nonterminal, children=[current_word]) for nonterminal in productions_lhs}
 
     # Calculate intermediate cells, based on two previously calculated cells
     # {A | A → BC ∈ grammar,
@@ -86,14 +96,16 @@ class CKYParser:
                 productions_lhs = {production.lhs() for production in releveant_productions}
 
                 # Convert each LHS entry to a CKYEntry item
-                node_parents = [first_set_item, second_set_item]
-                cky_entries = {CKYEntry(production_lhs, parents=node_parents) for production_lhs in productions_lhs}
+                node_children = [first_set_item, second_set_item]
+                cky_entries = {CKYEntry(production_lhs, children=node_children) for production_lhs in productions_lhs}
 
                 # Union with our set of valid CKYEntry items created so far
                 cell_contents = cell_contents.union(cky_entries)
         
         return cell_contents
     
+    # Get all productions in the grammar that have both of the given RHS items
+    # This method is used, since NLTK does not support searching for multiple RHS items
     def __get_productions_with_rhs(self, first_rhs, second_rhs):
         # Get all productions that contain the first_rhs nonterminal on its RHS
         productions_with_first_rhs = self.grammar.productions(rhs = first_rhs)
