@@ -1,135 +1,157 @@
 #!/usr/bin/env python3
 import sys
-import nltk
-
-# This class corresponds to a node in the parse tree
-#
-# nltk_node refers to a nltk nonterminal, taken from the grammar
-# children refers to either - 
-# 1.) a pair of CKYEntries that result from this node
-#     e.g. A -> BC, A is the nltk_node, and [B, C] are the children
-# 2.) a single terminal word (string)
-class CKYEntry:
-    def __init__(self, nltk_node, children = []):
-        self.nltk_node = nltk_node
-        self.children = children
+from nltk import load, word_tokenize, Tree
 
 
-# This class handles the CKY parsing algorithm
+__authors__ = ['einarh', 'avijitv']
+
+
 class CKYParser:
     def __init__(self, grammar):
+        """
+        :param grammar: CFG in Chomsky-Normal-Form
+        :type grammar: nltk.CFG
+        """
         self.grammar = grammar
 
-    # Parse a raw sentence, and return a list of valid parses
     def parse_sentence(self, sentence):
-        tokenized_sentence = nltk.word_tokenize(sentence)
-        return self.parse_tokenized_sentence(tokenized_sentence)
+        """ Parse a raw sentence, and return a list of valid parses
+        :type sentence: str
+        :return: valid_parses
+        :rtype: list(nltk.Tree)
+        """
+        tokenized_sentence = word_tokenize(text=sentence)
+        return self.parse_tokenized_sentence(tokenized_sentence=tokenized_sentence)
 
-    # Parse a tokenized sentence, and return a list of valid parses
     def parse_tokenized_sentence(self, tokenized_sentence):
+        """ Parse a tokenized sentence, and return a list of valid parses
+        :type tokenized_sentence: list(str)
+        :return: valid_parses
+        :rtype: list(nltk.Tree)
+        """
+
         # Build our square CKY table
         # Table will be (n + 1) x (n + 1), where n is len(tokenized_sentence)
         width = height = len(tokenized_sentence) + 1
 
-        # Each cell [i][j] contains a set of CKYEntry items
-        table = [[set() for x in range(width)] for y in range(height)] 
+        # Each cell [i][j] contains a list of subtrees
+        table = [[list() for x in range(width)] for y in range(height)]
     
         # We fill from left to right, bottom to top, for the top right triangle
         for j in range(1, width):
             # First fill in a terminal cell
             current_word = tokenized_sentence[j - 1]
-            table[j - 1][j] = self.__calculate_diagonal_cell(table, current_word)
+            table[j - 1][j] = self.__calculate_diagonal_cell(current_word=current_word)
             # Iterate over cells in upward direction from bottom-most cell
             for i in range(j - 1, -1, -1):
                 for k in range(i + 1, j):
-                    updated_entry = self.__calculate_intermediate_cell(table, i, j, k)
-                    table[i][j] = table[i][j].union(updated_entry)
+                    subtrees = self.__calculate_intermediate_cell(table=table, i=i, j=j, k=k)
+                    table[i][j] += subtrees
 
-        # Helpful for visualizing table!
-        # self.__visualize_table(table)
-    
-        # Return all top-level CKYEntry nodes
+        # Return all top-level valid parses
         top_level_entries = table[0][width-1]
-        valid_top_level_entries = {entry for entry in top_level_entries if entry.nltk_node.symbol() == 'S'}
-        return valid_top_level_entries
+        valid_parses = [entry for entry in top_level_entries
+                        if entry.label() == self.grammar.start()]
+        return valid_parses
 
-    # Pretty print the provided 2d list
-    def __visualize_table(self, table):
-        for row in table:
-            row_contents = []
-            for col in row:
-                row_contents.append([cky_entry.nltk_node for cky_entry in list(col)])
-            print(row_contents)
+    def __calculate_diagonal_cell(self, current_word):
+        """ Return list of nltk.Tree objects, which correspond to nonterminals with current_word as a rhs terminal
+        :type current_word: str
+        :return: cell_contents
+        :rtype: list(nltk.Tree)
+        """
 
-    # Return set of CKYEntrys, which correspond to nonterminals with current_word as a rhs terminal
-    def __calculate_diagonal_cell(self, table, current_word):
         # Search productions to find all lhs nonterminals that have current_word as a rhs terminal
-        releveant_productions = self.grammar.productions(rhs=current_word)
+        relevant_productions = self.grammar.productions(rhs=current_word)
 
         # Get LHS of each of the productions
-        productions_lhs = {production.lhs() for production in releveant_productions}
+        productions_lhs = {production.lhs() for production in relevant_productions}
 
-        # Convert to a set of CKYEntry items
-        return {CKYEntry(nonterminal, children=[current_word]) for nonterminal in productions_lhs}
+        # Convert to a list of nltk.Tree objects
+        cell_contents = [Tree(node=nonterminal, children=[current_word])
+                         for nonterminal in productions_lhs]
+        return cell_contents
 
-    # Calculate intermediate cells, based on two previously calculated cells
-    # {A | A → BC ∈ grammar,
-    #   B ∈ table[ i, k ],
-    #   C ∈ table[ k, j ]
-    # }
     def __calculate_intermediate_cell(self, table, i, j, k):
-        # Set containing the CKYEntrys we want to return
-        cell_contents = set()
+        """ Calculate intermediate cells, based on two previously calculated cells {A | A → BC ∈ grammar,
+                                                                                        B ∈ table[ i, k ],
+                                                                                        C ∈ table[ k, j ]}
+        :param table: DP table storing intermediate subtrees
+        :type table: list(list(nltk.Tree))
+        :param i: Start of Left subtree span
+        :type i: int
+        :param j: End of Right subtree span
+        :type j: int
+        :param k: End of Left subtree span and Right subtree span
+        :type k: int
+        :return: cell_contents
+        :rtype: list(nltk.Tree)
+        """
+
+        # List containing the subtrees to be returned
+        cell_contents = list()
 
         # Get contents of the two cells we will be using
-        first_set = table[i][k]
-        second_set = table[k][j]
+        first_list = table[i][k]
+        second_list = table[k][j]
 
         # Calculate every combination of first and second cell
-        for first_set_item in first_set:
-            for second_set_item in second_set:
-                # Check whether there is a production A -> B C, where B is first_set_item
-                # and B is second_set_item
-                releveant_productions = self.__get_productions_with_rhs(first_set_item.nltk_node, second_set_item.nltk_node)
+        for first_list_item in first_list:
+            for second_list_item in second_list:
+                # Check whether there is a production A -> B C, where B is first_list_item
+                # and C is second_list_item
+                relevant_productions = self.__get_productions_with_rhs(first_list_item.label(),
+                                                                       second_list_item.label())
 
                 # Get LHS of each of the productions
-                productions_lhs = {production.lhs() for production in releveant_productions}
+                lhs_productions = {production.lhs() for production in relevant_productions}
 
-                # Convert each LHS entry to a CKYEntry item
-                node_children = [first_set_item, second_set_item]
-                cky_entries = {CKYEntry(production_lhs, children=node_children) for production_lhs in productions_lhs}
+                # Convert each LHS entry to a valid subtree
+                subtrees = [Tree(node=nonterminal,
+                                 children=[first_list_item, second_list_item])
+                               for nonterminal in lhs_productions]
 
-                # Union with our set of valid CKYEntry items created so far
-                cell_contents = cell_contents.union(cky_entries)
+                # Add to list of valid subtrees created so far
+                cell_contents += subtrees
         
         return cell_contents
-    
-    # Get all productions in the grammar that have both of the given RHS items
-    # This method is used, since NLTK does not support searching for multiple RHS items
+
     def __get_productions_with_rhs(self, first_rhs, second_rhs):
+        """ Get all productions in the grammar that have both of the given RHS items
+            This method is used, since NLTK does not support searching for multiple RHS items
+        :type first_rhs: nltk.Nonterminal
+        :type second_rhs: nltk.Nonterminal
+        :rtype: list(nltk.Production)
+        """
         # Get all productions that contain the first_rhs nonterminal on its RHS
-        productions_with_first_rhs = self.grammar.productions(rhs = first_rhs)
+        productions_with_first_rhs = self.grammar.productions(rhs=first_rhs)
 
         # Get all productions that also contain second_rhs
         return [production for production in productions_with_first_rhs if second_rhs in production.rhs()]
                 
 
-
 def main(grammar_filename, sentence_filename, output_filename):
     # Load CNF grammar
-    grammar = nltk.data.load(grammar_filename, 'cfg')
+    grammar = load(grammar_filename)
 
     # Generate parser based on grammar
-    parser = CKYParser(grammar)
+    parser = CKYParser(grammar=grammar)
 
-    # Iterate over sentences in sentence_filename and produce parses
-    sentence_file = open(sentence_filename)
-    for line in sentence_file:
-        # Strip any trailing whitespace from line (including newlines)
-        line = line.rstrip()
-        print(parser.parse_sentence(line))
-
-    # Output parse data to output_filename
+    # Iterate over sentences in sentence_filename, produce parses and write to file with output_filename
+    with open(sentence_filename, 'r') as infile:
+        with open(output_filename, 'w') as outfile:
+            for line in infile.readlines():
+                # Strip any trailing whitespace from line (including newlines)
+                line = line.rstrip()
+                print(line)
+                outfile.write(line + '\n')
+                valid_parses = parser.parse_sentence(sentence=line)
+                for tree in valid_parses:
+                    print(tree)
+                    outfile.write(str(tree) + '\n')
+                print('Number of parses: %d' % len(valid_parses))
+                print()
+                outfile.write('Number of parses: %d\n\n' % len(valid_parses))
 
 
 if __name__ == "__main__":
@@ -147,7 +169,5 @@ if __name__ == "__main__":
     else:
         print("Invalid number of arguments. Expected:", file=sys.stderr)
         print("hw3_parser.sh <grammar_filename> <test_sentence_filename> <output_filename>", file=sys.stderr)
-        sys.exit()
+        sys.exit(-1)
     main(grammar_filename, sentence_filename, output_filename)
-
-
