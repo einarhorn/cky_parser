@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 from nltk import load, word_tokenize, Tree
+import numpy as np
 
 
 __authors__ = ['einarh', 'avijitv']
@@ -109,11 +110,11 @@ class CKYParser:
                 # Convert each LHS entry to a valid subtree
                 subtrees = [Tree(node=nonterminal,
                                  children=[first_list_item, second_list_item])
-                               for nonterminal in lhs_productions]
+                            for nonterminal in lhs_productions]
 
                 # Add to list of valid subtrees created so far
                 cell_contents += subtrees
-        
+
         return cell_contents
 
     def __get_productions_with_rhs(self, first_rhs, second_rhs):
@@ -126,8 +127,12 @@ class CKYParser:
         # Get all productions that contain the first_rhs nonterminal on its RHS
         productions_with_first_rhs = self.grammar.productions(rhs=first_rhs)
 
-        # Get all productions that also contain second_rhs
-        return [production for production in productions_with_first_rhs if second_rhs in production.rhs()]
+        # Get all productions of the form -> first_rhs second_rhs
+        relevant_productions = []
+        for candidate_prod in productions_with_first_rhs:
+            if len(candidate_prod.rhs()) == 2 and candidate_prod.rhs()[1] == second_rhs:
+                relevant_productions.append(candidate_prod)
+        return relevant_productions
                 
 
 def main(grammar_filename, sentence_filename, output_filename):
@@ -139,6 +144,7 @@ def main(grammar_filename, sentence_filename, output_filename):
 
     # Iterate over sentences in sentence_filename, produce parses and write to file with output_filename
     with open(sentence_filename, 'r') as infile:
+        number_parses = []
         with open(output_filename, 'w') as outfile:
             for line in infile.readlines():
                 # Strip any trailing whitespace from line (including newlines)
@@ -151,7 +157,10 @@ def main(grammar_filename, sentence_filename, output_filename):
                     outfile.write(str(tree) + '\n')
                 print('Number of parses: %d' % len(valid_parses))
                 print()
+                number_parses.append(len(valid_parses))
                 outfile.write('Number of parses: %d\n\n' % len(valid_parses))
+            avg_number_parses = np.mean(number_parses)
+            print('Average number of parses: %.3f' % avg_number_parses)
 
 
 if __name__ == "__main__":

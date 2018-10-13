@@ -6,14 +6,7 @@ Scientists rescued a mouse immune system.
       (VBD rescued)
       (NP (Det a) (Nom (Nom mouse) (Nom (ADJP immune) (Nom system)))))
     (PUNC .)))
-(TOP
-  (NP Scientists)
-  (_X_6
-    (VP
-      (VBD rescued)
-      (_X_7 (NP (Det a) (Nom mouse)) (NP (ADJP immune) (Nom system))))
-    (PUNC .)))
-Number of parses: 2
+Number of parses: 1
 
 Will this work in humans?
 (TOP
@@ -24,13 +17,6 @@ Will this work in humans?
 Number of parses: 1
 
 They published their research today online.
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VP (VBD published) (NP (PossPro their) (Nom research)))
-      (ADVP (Adv today) (Adv online)))
-    (PUNC .)))
 (TOP
   (NP They)
   (_X_6
@@ -47,7 +33,7 @@ They published their research today online.
         (ADVP today))
       (ADVP online))
     (PUNC .)))
-Number of parses: 3
+Number of parses: 2
 
 The immune response is alerted by dendritic cells.
 (TOP
@@ -157,91 +143,6 @@ They restored immunity in mice with a weak immune system.
   (_X_6
     (VP
       (VBD restored)
-      (_X_7
-        (NP immunity)
-        (PP
-          (Prep in)
-          (NP
-            (Nom mice)
-            (PP
-              (Prep with)
-              (NP
-                (Det a)
-                (Nom (ADJP weak) (Nom (ADJP immune) (Nom system)))))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP immunity)
-        (PP
-          (Prep in)
-          (NP
-            (Nom mice)
-            (PP
-              (Prep with)
-              (NP
-                (Det a)
-                (Nom (Nom (ADJP weak) (ADJP immune)) (Nom system))))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP immunity)
-        (PP
-          (Prep in)
-          (NP
-            (Nom mice)
-            (PP
-              (Prep with)
-              (NP
-                (Det a)
-                (Nom (ADJP (Adj weak) (ADJP immune)) (Nom system))))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP immunity)
-        (PP
-          (Prep in)
-          (NP
-            (Nom mice)
-            (PP
-              (Prep with)
-              (NP
-                (Det a)
-                (Nom (ADJP (Adj weak) (Adj immune)) (Nom system))))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP immunity)
-        (PP
-          (Prep in)
-          (NP
-            (Nom
-              (Nom mice)
-              (PP
-                (Prep with)
-                (NP (Det a) (Nom (ADJP weak) (ADJP immune)))))
-            (Nom system)))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
       (NP
         (Nom immunity)
         (PP
@@ -269,15 +170,32 @@ They restored immunity in mice with a weak immune system.
               (Prep with)
               (NP
                 (Det a)
-                (Nom (Nom (ADJP weak) (ADJP immune)) (Nom system))))))))
+                (Nom (ADJP (Adj weak) (ADJP immune)) (Nom system))))))))
     (PUNC .)))
 (TOP
   (NP They)
   (_X_6
     (VP
       (VBD restored)
-      (NP
-        (Nom immunity)
+      (_X_7
+        (NP immunity)
+        (PP
+          (Prep in)
+          (NP
+            (Nom mice)
+            (PP
+              (Prep with)
+              (NP
+                (Det a)
+                (Nom (ADJP weak) (Nom (ADJP immune) (Nom system)))))))))
+    (PUNC .)))
+(TOP
+  (NP They)
+  (_X_6
+    (VP
+      (VBD restored)
+      (_X_7
+        (NP immunity)
         (PP
           (Prep in)
           (NP
@@ -294,16 +212,12 @@ They restored immunity in mice with a weak immune system.
     (VP
       (VBD restored)
       (NP
-        (Nom immunity)
+        (Nom (Nom immunity) (PP (Prep in) (NP mice)))
         (PP
-          (Prep in)
+          (Prep with)
           (NP
-            (Nom mice)
-            (PP
-              (Prep with)
-              (NP
-                (Det a)
-                (Nom (ADJP (Adj weak) (Adj immune)) (Nom system))))))))
+            (Det a)
+            (Nom (ADJP weak) (Nom (ADJP immune) (Nom system)))))))
     (PUNC .)))
 (TOP
   (NP They)
@@ -311,16 +225,12 @@ They restored immunity in mice with a weak immune system.
     (VP
       (VBD restored)
       (NP
-        (Nom immunity)
+        (Nom (Nom immunity) (PP (Prep in) (NP mice)))
         (PP
-          (Prep in)
+          (Prep with)
           (NP
-            (Nom
-              (Nom mice)
-              (PP
-                (Prep with)
-                (NP (Det a) (Nom (ADJP weak) (ADJP immune)))))
-            (Nom system)))))
+            (Det a)
+            (Nom (ADJP (Adj weak) (ADJP immune)) (Nom system))))))
     (PUNC .)))
 (TOP
   (NP They)
@@ -346,147 +256,9 @@ They restored immunity in mice with a weak immune system.
           (Prep with)
           (NP
             (Det a)
-            (Nom (Nom (ADJP weak) (ADJP immune)) (Nom system))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP (Nom immunity) (PP (Prep in) (NP mice)))
-        (PP
-          (Prep with)
-          (NP
-            (Det a)
             (Nom (ADJP (Adj weak) (ADJP immune)) (Nom system))))))
     (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP (Nom immunity) (PP (Prep in) (NP mice)))
-        (PP
-          (Prep with)
-          (NP
-            (Det a)
-            (Nom (ADJP (Adj weak) (Adj immune)) (Nom system))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (NP
-        (Nom (Nom immunity) (PP (Prep in) (NP mice)))
-        (PP
-          (Prep with)
-          (NP
-            (Det a)
-            (Nom (ADJP weak) (Nom (ADJP immune) (Nom system)))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (NP
-        (Nom (Nom immunity) (PP (Prep in) (NP mice)))
-        (PP
-          (Prep with)
-          (NP
-            (Det a)
-            (Nom (Nom (ADJP weak) (ADJP immune)) (Nom system))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (NP
-        (Nom (Nom immunity) (PP (Prep in) (NP mice)))
-        (PP
-          (Prep with)
-          (NP
-            (Det a)
-            (Nom (ADJP (Adj weak) (ADJP immune)) (Nom system))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (NP
-        (Nom (Nom immunity) (PP (Prep in) (NP mice)))
-        (PP
-          (Prep with)
-          (NP
-            (Det a)
-            (Nom (ADJP (Adj weak) (Adj immune)) (Nom system))))))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP
-          (Nom immunity)
-          (PP
-            (Prep in)
-            (NP
-              (Nom mice)
-              (PP
-                (Prep with)
-                (NP (Det a) (Nom (ADJP weak) (ADJP immune)))))))
-        (NP system)))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (NP
-        (Nom
-          (Nom immunity)
-          (PP
-            (Prep in)
-            (NP
-              (Nom mice)
-              (PP
-                (Prep with)
-                (NP (Det a) (Nom (ADJP weak) (ADJP immune)))))))
-        (Nom system)))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (_X_7
-        (NP
-          (Nom (Nom immunity) (PP (Prep in) (NP mice)))
-          (PP
-            (Prep with)
-            (NP (Det a) (Nom (ADJP weak) (ADJP immune)))))
-        (NP system)))
-    (PUNC .)))
-(TOP
-  (NP They)
-  (_X_6
-    (VP
-      (VBD restored)
-      (NP
-        (Nom
-          (Nom (Nom immunity) (PP (Prep in) (NP mice)))
-          (PP
-            (Prep with)
-            (NP (Det a) (Nom (ADJP weak) (ADJP immune)))))
-        (Nom system)))
-    (PUNC .)))
-Number of parses: 22
+Number of parses: 8
 
 Their immune system was compromised by sepsis.
 (TOP
